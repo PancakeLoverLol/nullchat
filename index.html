@@ -1,234 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>nullchat</title>
+  <title>NullChat</title>
   <style>
     body {
+      background: #0e0e0e;
+      color: #ccc;
+      font-family: monospace;
+      padding: 0;
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #0a0a0a;
-      color: white;
+    }
+    #passwordScreen {
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: center;
       height: 100vh;
-      padding: 1em;
-      box-sizing: border-box;
+      flex-direction: column;
+      background: #0e0e0e;
     }
-
-    .card {
-      background: #111;
-      border-radius: 20px;
-      box-shadow: 0 0 20px #00ffee22;
-      padding: 2em;
-      width: 300px;
-      max-width: 90vw;
-      transition: all 0.3s ease;
-    }
-
-    input, button, select {
-      width: 100%;
-      padding: 0.7em;
-      border: none;
-      border-radius: 12px;
-      margin-top: 1em;
-      background: #222;
-      color: white;
-      font-size: 1em;
-      cursor: pointer;
-    }
-
-    input:focus, button:hover, select:focus {
-      outline: none;
-      background: #333;
-    }
-
-    #chatroom {
+    #mainContent {
       display: none;
-      flex-direction: row;
-      height: 90vh;
-      width: 100vw;
-      max-width: 1200px;
-      gap: 1em;
+      padding: 10px;
     }
-
     #messages {
-      flex: 1 1 70%;
+      max-height: 60vh;
       overflow-y: auto;
-      background: #111;
-      border-radius: 12px;
-      padding: 1em;
-      margin-bottom: 0.5em;
-      display: flex;
-      flex-direction: column;
+      border: 1px solid #333;
+      padding: 10px;
     }
-
-    #typing {
-      font-size: 0.9em;
-      color: #888;
-      height: 1.5em;
-      margin-bottom: 0.5em;
-    }
-
-    #clanPanel {
-      flex: 0 0 280px;
-      background: #111;
-      border-radius: 12px;
-      padding: 1em;
-      display: flex;
-      flex-direction: column;
-      gap: 1em;
-      overflow-y: auto;
-      max-height: 90vh;
-    }
-
     .msg {
-      background: #222;
-      padding: 0.5em 1em;
-      border-radius: 10px;
-      margin-bottom: 0.5em;
-      max-width: 90%;
-      position: relative;
-      word-wrap: break-word;
+      margin-bottom: 8px;
     }
-
-    .timestamp {
-      font-size: 0.7em;
-      color: #888;
-      margin-top: 0.2em;
-    }
-
     .username {
-      color: #00ffee;
-      font-weight: bold;
+      color: #8af;
     }
-
-    .clanTag {
-      background: #00bb88;
-      color: #000;
-      font-weight: bold;
-      border-radius: 6px;
-      padding: 0 6px;
-      margin-right: 6px;
+    .timestamp {
+      color: #777;
       font-size: 0.8em;
-      vertical-align: middle;
     }
-
-    .delete-btn {
-      position: absolute;
-      right: 10px;
-      top: 8px;
-      background: none;
-      border: none;
-      color: #f55;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 1.1em;
-      opacity: 0.7;
-      transition: opacity 0.2s;
+    #typingStatus {
+      font-size: 0.8em;
+      color: #555;
+      margin-top: 4px;
     }
-    .delete-btn:hover {
-      opacity: 1;
-    }
-
-    @keyframes fadeIn {
-      from {opacity: 0;}
-      to {opacity: 1;}
-    }
-
-    .fade {
-      animation: fadeIn 0.3s ease;
-    }
-
-    h3 {
-      margin: 0 0 0.5em 0;
-      font-weight: normal;
-      border-bottom: 1px solid #00ffee66;
-      padding-bottom: 0.3em;
-    }
-
-    #messagesWrapper {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      flex: 1;
-    }
-
   </style>
 </head>
 <body>
-  <!-- Login Card -->
-  <div class="card" id="loginCard" style="margin:auto;">
-    <h2 style="margin: 0;">Enter nullchat</h2>
-    <input type="password" id="passwordInput" placeholder="Enter password..." />
+  <div id="passwordScreen">
+    <input type="password" id="passwordInput" placeholder="Enter password" />
     <button onclick="checkPassword()">Enter</button>
   </div>
 
-  <!-- Chatroom -->
-  <div id="chatroom">
-    <div id="messagesWrapper">
-      <div id="messages"></div>
-      <div id="typing"></div>
-      <input type="text" id="msgInput" placeholder="Type your message..." autocomplete="off" />
-      <button onclick="sendMessage()">Send</button>
-    </div>
-
-    <div id="clanPanel" class="card">
-      <h3>Clan Panel</h3>
-      <div id="currentClan">Not in a clan</div>
-
-      <div id="clanActions">
-
-        <div id="createClanSection">
-          <input type="text" id="newClanName" placeholder="New clan name" maxlength="20" />
-          <button onclick="createClan()">Create Clan</button>
-        </div>
-
-        <div id="joinClanSection" style="display:none;">
-          <input type="text" id="joinClanName" placeholder="Clan to join" maxlength="20" />
-          <button onclick="requestJoinClan()">Request to Join</button>
-        </div>
-
-        <div id="adminRequestsSection" style="display:none;">
-          <h4>Join Requests</h4>
-          <div id="joinRequestsList">No requests</div>
-        </div>
-
-      </div>
-    </div>
+  <div id="mainContent">
+    <h1>nullchat</h1>
+    <div id="messages"></div>
+    <input id="messageInput" placeholder="Say something..." />
+    <button onclick="sendMessage()">Send</button>
+    <div id="typingStatus"></div>
+    <hr>
+    <h3>Your Clan: <span id="yourClan">None</span></h3>
+    <input id="newClanName" placeholder="Create new clan" />
+    <button onclick="createClan()">Create Clan</button>
+    <br><br>
+    <input id="joinClanName" placeholder="Request to join clan" />
+    <button onclick="requestJoinClan()">Request Join</button>
+    <div id="joinRequests"></div>
   </div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-
-  <script>
-    const PASSWORD = "chat123";
-
-    function checkPassword() {
-      const input = document.getElementById("passwordInput").value;
-      if (input === PASSWORD) {
-        document.getElementById("loginCard").style.display = "none";
-        document.getElementById("chatroom").style.display = "flex";
-        initChat();
-      } else {
-        alert("Wrong password.");
-      }
-    }
-
-    // Hardcoded global admins - can delete any messages
-    const globalAdmins = ["null_1", "null_2"]; // adjust as needed
-
-    function isAdmin() {
-      return globalAdmins.includes(username);
-    }
-
-    // Globals
-    let username = null;
-    let userClan = null;
-    let isTyping = false;
-    let typingTimeout;
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, onChildAdded, push, set, remove, onValue, runTransaction, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDU7ocYo8pj-jq1JtBMy6aKlOS57ATvPlg",
@@ -240,276 +81,128 @@
       appId: "1:822668504447:web:350ff354d5b13f8cc8fe4a"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    // Assign unique username like null_#
-    function generateUsernameWithId() {
-      return new Promise((resolve) => {
-        const stored = localStorage.getItem("nullchat_user");
-        if (stored) {
-          resolve(stored);
-          return;
-        }
-        const countRef = db.ref("userCount");
-        countRef.transaction(current => {
-          return (current || 0) + 1;
-        }, (error, committed, snapshot) => {
-          if (error) {
-            console.error("Failed to get user ID:", error);
-            resolve("null_0");
-          } else if (!committed) {
-            resolve("null_0");
-          } else {
-            const newId = snapshot.val();
-            const newUsername = `null_${newId}`;
-            localStorage.setItem("nullchat_user", newUsername);
-            resolve(newUsername);
-          }
-        });
+    let username = localStorage.getItem("nullchat_user");
+
+    if (!username) {
+      const countRef = ref(db, "userCount");
+      runTransaction(countRef, current => (current || 0) + 1).then(({ snapshot }) => {
+        username = `null_${snapshot.val()}`;
+        localStorage.setItem("nullchat_user", username);
       });
     }
 
-    function initChat() {
-      generateUsernameWithId().then(name => {
-        username = name;
-        listenToUserClan();
-        setupChatListeners();
-      });
-    }
+    const password = "nullpass";
 
-    const msgInput = document.getElementById("msgInput");
-    const messagesDiv = document.getElementById("messages");
-    const typingDiv = document.getElementById("typing");
-    const currentClanDiv = document.getElementById("currentClan");
-    const createClanSection = document.getElementById("createClanSection");
-    const joinClanSection = document.getElementById("joinClanSection");
-    const adminRequestsSection = document.getElementById("adminRequestsSection");
-    const joinRequestsList = document.getElementById("joinRequestsList");
-
-    // Send chat message
-    function sendMessage() {
-      const text = msgInput.value.trim();
-      if (text === "") return;
-      const time = new Date().toLocaleTimeString();
-      db.ref("messages").push({ text, time, user: username, clan: userClan || null });
-      msgInput.value = "";
-      stopTyping();
-    }
-
-    // Delete message by key
-    function deleteMessage(key) {
-      if (confirm("Delete this message?")) {
-        db.ref("messages/" + key).remove();
-      }
-    }
-
-    // Listen for clan membership changes
-    function listenToUserClan() {
-      db.ref(`users/${username}/clan`).on("value", snap => {
-        userClan = snap.val();
-        updateClanUI();
-      });
-    }
-
-    // Update clan panel UI
-    function updateClanUI() {
-      if (userClan) {
-        currentClanDiv.textContent = `Clan: ${userClan}`;
-        createClanSection.style.display = "none";
-        joinClanSection.style.display = "none";
-
-        // Show join requests if user is clan admin
-        db.ref(`clans/${userClan}/admin`).once("value").then(adminSnap => {
-          const clanAdmin = adminSnap.val();
-          if (clanAdmin === username) {
-            adminRequestsSection.style.display = "block";
-            loadJoinRequests();
-          } else {
-            adminRequestsSection.style.display = "none";
-          }
-        });
+    window.checkPassword = function () {
+      const input = document.getElementById("passwordInput").value;
+      if (input === password) {
+        document.getElementById("passwordScreen").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
       } else {
-        currentClanDiv.textContent = "Not in a clan";
-        createClanSection.style.display = "block";
-        joinClanSection.style.display = "block";
-        adminRequestsSection.style.display = "none";
+        alert("Wrong password");
       }
     }
 
-    // Create a new clan
-    function createClan() {
-      const clanName = document.getElementById("newClanName").value.trim();
-      if (!clanName) {
-        alert("Please enter a clan name.");
-        return;
-      }
-      const clanRef = db.ref(`clans/${clanName}`);
+    const messageInput = document.getElementById("messageInput");
+    const messagesDiv = document.getElementById("messages");
+    const typingStatus = document.getElementById("typingStatus");
 
-      clanRef.once("value").then(snap => {
-        if (snap.exists()) {
-          alert("Clan name already taken.");
-          return;
-        }
-        // Create clan node with admin and add user as member
-        clanRef.set({
-          admin: username,
-          members: {
-            [username]: true
-          },
-          joinRequests: {}
-        }).then(() => {
-          // Update user clan
-          db.ref(`users/${username}/clan`).set(clanName);
-          alert(`Clan "${clanName}" created!`);
-          document.getElementById("newClanName").value = "";
-        });
-      });
+    const admins = ["null_1"];
+
+    function isAdmin() {
+      return admins.includes(username);
     }
 
-    // Request to join a clan
-    function requestJoinClan() {
-      const clanName = document.getElementById("joinClanName").value.trim();
-      if (!clanName) {
-        alert("Enter clan name to join.");
-        return;
-      }
-      const clanRef = db.ref(`clans/${clanName}`);
+    onChildAdded(ref(db, "messages"), snap => {
+      const { text, time, user } = snap.val();
+      const key = snap.key;
 
-      clanRef.once("value").then(snap => {
-        if (!snap.exists()) {
-          alert("Clan does not exist.");
-          return;
-        }
-        // Add join request under clan joinRequests
-        clanRef.child("joinRequests").child(username).set(true).then(() => {
-          alert(`Join request sent to clan "${clanName}".`);
-          document.getElementById("joinClanName").value = "";
-        });
-      });
-    }
-
-    // Load join requests for clan admin
-    function loadJoinRequests() {
-      if (!userClan) return;
-      const joinReqRef = db.ref(`clans/${userClan}/joinRequests`);
-
-      joinReqRef.off(); // clear previous listeners
-      joinRequestsList.innerHTML = "Loading...";
-
-      joinReqRef.on("value", snap => {
-        const requests = snap.val();
-        if (!requests) {
-          joinRequestsList.innerHTML = "No requests";
-          return;
-        }
-        joinRequestsList.innerHTML = "";
-        Object.keys(requests).forEach(requestUser => {
-          const div = document.createElement("div");
-          div.style.marginBottom = "0.5em";
-          div.textContent = requestUser + " ";
-
-          const acceptBtn = document.createElement("button");
-          acceptBtn.textContent = "Accept";
-          acceptBtn.style.marginRight = "0.5em";
-          acceptBtn.onclick = () => respondToRequest(requestUser, true);
-
-          const rejectBtn = document.createElement("button");
-          rejectBtn.textContent = "Reject";
-          rejectBtn.onclick = () => respondToRequest(requestUser, false);
-
-          div.appendChild(acceptBtn);
-          div.appendChild(rejectBtn);
-
-          joinRequestsList.appendChild(div);
-        });
-      });
-    }
-
-    // Accept or reject join request
-    function respondToRequest(requestUser, accept) {
-      if (!userClan) return;
-      const joinReqRef = db.ref(`clans/${userClan}/joinRequests/${requestUser}`);
-      const membersRef = db.ref(`clans/${userClan}/members`);
-      const userClanRef = db.ref(`users/${requestUser}/clan`);
-
-      if (accept) {
-        // Add user as member
-        membersRef.child(requestUser).set(true);
-        // Update user's clan pointer
-        userClanRef.set(userClan);
-      }
-      // Remove join request
-      joinReqRef.remove();
-    }
-
-    // Chat listeners & logic
-    function setupChatListeners() {
-      // Messages listener
-      db.ref("messages").on("child_added", snap => {
-        addMessage(snap.key, snap.val());
-      });
-      db.ref("messages").on("child_removed", snap => {
-        const key = snap.key;
-        const el = document.querySelector(`[data-key="${key}"]`);
-        if (el) el.remove();
-      });
-
-      // Typing indicator listener
-      db.ref("typing").on("value", snap => {
-        const typingUsers = snap.val() || {};
-        const othersTyping = Object.entries(typingUsers)
-          .filter(([user, isTyping]) => isTyping && user !== username)
-          .map(([user]) => user);
-
-        if (othersTyping.length > 0) {
-          typingDiv.textContent = `${othersTyping.join(", ")} is typing...`;
-        } else {
-          typingDiv.textContent = "";
-        }
-      });
-
-      // Setup typing detection
-      msgInput.addEventListener("input", startTyping);
-      msgInput.addEventListener("keydown", e => {
-        if (e.key === "Enter") sendMessage();
-      });
-    }
-
-    function addMessage(key, { text, time, user, clan }) {
       const div = document.createElement("div");
-      div.className = "msg fade";
-      div.setAttribute("data-key", key);
+      div.className = "msg";
 
       const canDelete = user === username || isAdmin();
 
-      div.innerHTML = `
-        <div>
-          ${clan ? `<span class="clanTag">${escapeHTML(clan)}</span>` : ''}
-          <span class="username">${escapeHTML(user)}</span>: ${escapeHTML(text)}
-          ${canDelete ? `<button class="delete-btn" title="Delete message" onclick="deleteMessage('${key}')">×</button>` : ""}
-        </div>
-        <div class="timestamp">${time}</div>
-      `;
+      div.innerHTML = `<div><span class="username">${user}</span>: ${text} ${canDelete ? `<button onclick="deleteMessage('${key}')">✖</button>` : ''}</div><div class="timestamp">${time}</div>`;
 
       messagesDiv.appendChild(div);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+
+    function sendMessage() {
+      const text = messageInput.value;
+      if (!text.trim()) return;
+      const time = new Date().toLocaleTimeString();
+
+      push(ref(db, "messages"), { user: username, text, time });
+      messageInput.value = "";
+      update(ref(db), { typing: null });
     }
 
-    // Escape HTML helper
-    function escapeHTML(str) {
-      return str.replace(/[&<>"']/g, function (m) {
-        return ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#39;'
-        })[m];
-      });
+    window.sendMessage = sendMessage;
+
+    window.deleteMessage = function (key) {
+      if (confirm("Delete this message?")) {
+        remove(ref(db, "messages/" + key));
+      }
     }
 
-    function startTyping() {
-      if (!isTyping) {
-        isTyping = true;
-        db.ref(`typing/${username}`).set(true
+    messageInput.addEventListener("input", () => {
+      update(ref(db), { typing: username });
+    });
+
+    onValue(ref(db, "typing"), snap => {
+      const val = snap.val();
+      typingStatus.textContent = val && val !== username ? `${val} is typing...` : "";
+    });
+
+    // Clan features
+    const clanDisplay = document.getElementById("yourClan");
+
+    onValue(ref(db, `clans_users/${username}`), snap => {
+      clanDisplay.textContent = snap.val() || "None";
+    });
+
+    window.createClan = function () {
+      const name = document.getElementById("newClanName").value.trim();
+      if (!name) return;
+      set(ref(db, `clans/${name}/owner`), username);
+      set(ref(db, `clans_users/${username}`), name);
+    }
+
+    window.requestJoinClan = function () {
+      const name = document.getElementById("joinClanName").value.trim();
+      if (!name) return;
+      push(ref(db, `clan_requests/${name}`), username);
+      alert("Request sent!");
+    }
+
+    onValue(ref(db, `clans`), snap => {
+      const clans = snap.val();
+      for (let clanName in clans) {
+        if (clans[clanName].owner === username) {
+          onValue(ref(db, `clan_requests/${clanName}`), requestSnap => {
+            const reqs = requestSnap.val();
+            const div = document.getElementById("joinRequests");
+            div.innerHTML = `<h4>Requests to join ${clanName}:</h4>`;
+            for (let key in reqs) {
+              const user = reqs[key];
+              const p = document.createElement("p");
+              p.innerHTML = `${user} <button onclick="approveRequest('${clanName}','${key}','${user}')">Approve</button>`;
+              div.appendChild(p);
+            }
+          });
+        }
+      }
+    });
+
+    window.approveRequest = function (clanName, key, user) {
+      set(ref(db, `clans_users/${user}`), clanName);
+      remove(ref(db, `clan_requests/${clanName}/${key}`));
+    }
+
+  </script>
+</body>
+</html>
