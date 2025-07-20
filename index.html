@@ -56,7 +56,13 @@
       background: #111;
       border-radius: 12px;
       padding: 1em;
-      margin-bottom: 1em;
+      margin-bottom: 0.5em;
+    }
+
+    #typing {
+      font-size: 0.9em;
+      color: #888;
+      height: 1.5em;
     }
 
     .msg {
@@ -98,6 +104,7 @@
   <!-- Chatroom -->
   <div id="chatroom">
     <div id="messages"></div>
+    <div id="typing"></div>
     <input type="text" id="msgInput" placeholder="Type your message..." />
     <button onclick="sendMessage()">Send</button>
   </div>
@@ -107,7 +114,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
   <script>
-    // 🔒 Set your password here
     const PASSWORD = "chat123";
 
     function checkPassword() {
@@ -120,7 +126,6 @@
       }
     }
 
-    // 🆔 Get or create persistent anonymous username
     function getAnonUsername() {
       let id = localStorage.getItem("nullchat_user");
       if (!id) {
@@ -135,7 +140,6 @@
 
     const username = getAnonUsername();
 
-    // ✅ Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDU7ocYo8pj-jq1JtBMy6aKlOS57ATvPlg",
       authDomain: "nullchat-e0243.firebaseapp.com",
@@ -151,15 +155,19 @@
 
     const msgInput = document.getElementById("msgInput");
     const messagesDiv = document.getElementById("messages");
+    const typingDiv = document.getElementById("typing");
 
+    // Send message
     function sendMessage() {
       const text = msgInput.value.trim();
       if (text === "") return;
       const time = new Date().toLocaleTimeString();
       db.ref("messages").push({ text, time, user: username });
       msgInput.value = "";
+      stopTyping();
     }
 
+    // Display messages
     db.ref("messages").on("child_added", snap => {
       const { text, time, user } = snap.val();
       const div = document.createElement("div");
@@ -169,9 +177,49 @@
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     });
 
+    // Typing indicator logic
+    let typingTimeout;
+    let isTyping = false;
+
+    function startTyping() {
+      if (!isTyping) {
+        isTyping = true;
+        db.ref(`typing/${username}`).set(true);
+      }
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(stopTyping, 2000);
+    }
+
+    function stopTyping() {
+      if (isTyping) {
+        db.ref(`typing/${username}`).set(false);
+        isTyping = false;
+      }
+    }
+
+    msgInput.addEventListener("input", startTyping);
     msgInput.addEventListener("keydown", e => {
       if (e.key === "Enter") sendMessage();
+    });
+
+    // Listen to typing status
+    db.ref("typing").on("value", snap => {
+      const typingUsers = snap.val();
+      let list = [];
+
+      for (const user in typingUsers) {
+        if (typingUsers[user] && user !== username) {
+          list.push(user);
+        }
+      }
+
+      if (list.length > 0) {
+        typingDiv.textContent = `${list.join(', ')} is typing...`;
+      } else {
+        typingDiv.textContent = "";
+      }
     });
   </script>
 </body>
 </html>
+
