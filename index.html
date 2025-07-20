@@ -117,6 +117,7 @@
     const db = getDatabase(app);
     const messagesRef = ref(db, "messages");
 
+    // Only null_2 is admin now
     const admins = ['null_2'];
 
     let username = localStorage.getItem('nullchat_username');
@@ -164,13 +165,16 @@
       div.appendChild(document.createTextNode(`: ${text} `));
       div.appendChild(timeSpan);
 
+      // Delete button if message sender or admin
       if (user === username || admins.includes(username)) {
         const delBtn = document.createElement('button');
         delBtn.className = 'delete-btn';
         delBtn.textContent = '×';
         delBtn.title = 'Delete message';
         delBtn.onclick = () => {
-          remove(ref(db, `messages/${id}`));
+          remove(ref(db, `messages/${id}`)).catch(err => {
+            alert('Failed to delete message: ' + err.message);
+          });
         };
         div.appendChild(delBtn);
       }
@@ -178,8 +182,8 @@
       messagesDiv.appendChild(div);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     });
-
   </script>
 
 </body>
 </html>
+
