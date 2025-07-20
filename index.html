@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>nullchat</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0a0a0a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: #111;
+      border-radius: 20px;
+      box-shadow: 0 0 20px #00ffee22;
+      padding: 2em;
+      width: 90%;
+      max-width: 500px;
+      transition: all 0.3s ease;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 0.7em;
+      border: none;
+      border-radius: 12px;
+      margin-top: 1em;
+      background: #222;
+      color: white;
+      font-size: 1em;
+    }
+
+    input:focus, button:hover {
+      outline: none;
+      background: #333;
+    }
+
+    #chatroom {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      padding: 1em;
+      box-sizing: border-box;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      background: #111;
+      border-radius: 12px;
+      padding: 1em;
+      margin-bottom: 1em;
+    }
+
+    .msg {
+      background: #222;
+      padding: 0.5em 1em;
+      border-radius: 10px;
+      margin-bottom: 0.5em;
+      max-width: 90%;
+    }
+
+    .timestamp {
+      font-size: 0.7em;
+      color: #888;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    .fade {
+      animation: fadeIn 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Card -->
+  <div class="card" id="loginCard">
+    <h2 style="margin: 0;">Enter nullchat</h2>
+    <input type="password" id="passwordInput" placeholder="Enter password..." />
+    <button onclick="checkPassword()">Enter</button>
+  </div>
+
+  <!-- Chatroom -->
+  <div id="chatroom">
+    <div id="messages"></div>
+    <input type="text" id="msgInput" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+  <script>
+    // 🔒 Set your password here
+    const PASSWORD = "chat123";
+
+    function checkPassword() {
+      const input = document.getElementById("passwordInput").value;
+      if (input === PASSWORD) {
+        document.getElementById("loginCard").style.display = "none";
+        document.getElementById("chatroom").style.display = "flex";
+      } else {
+        alert("Wrong password.");
+      }
+    }
+
+    // ✅ Firebase config (yours)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDU7ocYo8pj-jq1JtBMy6aKlOS57ATvPlg",
+      authDomain: "nullchat-e0243.firebaseapp.com",
+      databaseURL: "https://nullchat-e0243-default-rtdb.firebaseio.com",
+      projectId: "nullchat-e0243",
+      storageBucket: "nullchat-e0243.firebasestorage.app",
+      messagingSenderId: "822668504447",
+      appId: "1:822668504447:web:350ff354d5b13f8cc8fe4a"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const msgInput = document.getElementById("msgInput");
+    const messagesDiv = document.getElementById("messages");
+
+    // Send message
+    function sendMessage() {
+      const text = msgInput.value.trim();
+      if (text === "") return;
+      const time = new Date().toLocaleTimeString();
+      db.ref("messages").push({ text, time });
+      msgInput.value = "";
+    }
+
+    // Listen for new messages
+    db.ref("messages").on("child_added", snap => {
+      const { text, time } = snap.val();
+      const div = document.createElement("div");
+      div.className = "msg fade";
+      div.innerHTML = `<div>${text}</div><div class="timestamp">${time}</div>`;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+
+    // Send with Enter key
+    msgInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
