@@ -2,83 +2,140 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NullChat</title>
+  <title>nullchat</title>
   <style>
     body {
       margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #0d0d0d;
-      color: #e0f7fa;
-    }
-    #passwordScreen, #mainContent {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0a0a0a;
+      color: white;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
     }
-    #mainContent {
-      display: none;
-    }
-    input, button {
-      margin: 5px;
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      font-size: 16px;
-    }
-    button {
-      background-color: #1de9b6;
-      color: #000;
-      cursor: pointer;
-    }
-    #chat {
+
+    .card {
+      background: #111;
+      border-radius: 20px;
+      box-shadow: 0 0 20px #00ffee22;
+      padding: 2em;
       width: 90%;
-      max-width: 600px;
-      background-color: #1c1c1c;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 0 10px rgba(29, 233, 182, 0.3);
+      max-width: 500px;
+      transition: all 0.3s ease;
     }
+
+    input, button {
+      width: 100%;
+      padding: 0.7em;
+      border: none;
+      border-radius: 12px;
+      margin-top: 1em;
+      background: #222;
+      color: white;
+      font-size: 1em;
+    }
+
+    input:focus, button:hover {
+      outline: none;
+      background: #333;
+    }
+
+    #chatroom {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      padding: 1em;
+      box-sizing: border-box;
+    }
+
     #messages {
-      height: 300px;
+      flex: 1;
       overflow-y: auto;
-      border: 1px solid #333;
-      padding: 10px;
-      margin-bottom: 10px;
+      background: #111;
+      border-radius: 12px;
+      padding: 1em;
+      margin-bottom: 1em;
     }
-    .message {
-      margin-bottom: 10px;
+
+    .msg {
+      background: #222;
+      padding: 0.5em 1em;
+      border-radius: 10px;
+      margin-bottom: 0.5em;
+      max-width: 90%;
     }
-    .typing-indicator {
-      font-style: italic;
-      font-size: 12px;
+
+    .timestamp {
+      font-size: 0.7em;
+      color: #888;
+    }
+
+    .username {
+      color: #00ffee;
+      font-weight: bold;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    .fade {
+      animation: fadeIn 0.3s ease;
     }
   </style>
 </head>
 <body>
-  <div id="passwordScreen">
-    <input type="password" id="passwordInput" placeholder="Enter password" />
+  <!-- Login Card -->
+  <div class="card" id="loginCard">
+    <h2 style="margin: 0;">Enter nullchat</h2>
+    <input type="password" id="passwordInput" placeholder="Enter password..." />
     <button onclick="checkPassword()">Enter</button>
   </div>
 
-  <div id="mainContent">
-    <h1>NullChat</h1>
-    <div id="chat">
-      <div id="messages"></div>
-      <div class="typing-indicator" id="typing"></div>
-      <input type="text" id="messageInput" placeholder="Type a message..." oninput="sendTyping()" />
-      <button onclick="sendMessage()">Send</button>
-    </div>
+  <!-- Chatroom -->
+  <div id="chatroom">
+    <div id="messages"></div>
+    <input type="text" id="msgInput" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove, set, get, child, update } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
+  <script>
+    // 🔒 Set your password here
+    const PASSWORD = "chat123";
+
+    function checkPassword() {
+      const input = document.getElementById("passwordInput").value;
+      if (input === PASSWORD) {
+        document.getElementById("loginCard").style.display = "none";
+        document.getElementById("chatroom").style.display = "flex";
+      } else {
+        alert("Wrong password.");
+      }
+    }
+
+    // 🆔 Get or create persistent anonymous username
+    function getAnonUsername() {
+      let id = localStorage.getItem("nullchat_user");
+      if (!id) {
+        const prefix = ["anon", "ghost", "shadow", "null"];
+        const pick = prefix[Math.floor(Math.random() * prefix.length)];
+        const suffix = Math.random().toString(16).slice(2, 5);
+        id = `${pick}-${suffix}`;
+        localStorage.setItem("nullchat_user", id);
+      }
+      return id;
+    }
+
+    const username = getAnonUsername();
+
+    // ✅ Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDU7ocYo8pj-jq1JtBMy6aKlOS57ATvPlg",
       authDomain: "nullchat-e0243.firebaseapp.com",
@@ -89,113 +146,32 @@
       appId: "1:822668504447:web:350ff354d5b13f8cc8fe4a"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    const password = "nullscapes";
-    const passwordScreen = document.getElementById("passwordScreen");
-    const mainContent = document.getElementById("mainContent");
-
-    function checkPassword() {
-      const input = document.getElementById("passwordInput").value;
-      if (input === password) {
-        passwordScreen.style.display = "none";
-        mainContent.style.display = "flex";
-        initUser();
-        listenForMessages();
-        listenForTyping();
-      }
-    }
-
-    let username = localStorage.getItem("nullchat_username");
-    async function initUser() {
-      if (!username) {
-        const userCountRef = ref(db, "userCount");
-        const snapshot = await get(userCountRef);
-        let count = snapshot.exists() ? snapshot.val() + 1 : 1;
-        username = `null_${count}`;
-        localStorage.setItem("nullchat_username", username);
-        await set(userCountRef, count);
-      }
-    }
-
-    const messagesRef = ref(db, "messages");
-    const typingRef = ref(db, "typing");
+    const msgInput = document.getElementById("msgInput");
     const messagesDiv = document.getElementById("messages");
-    const typingDiv = document.getElementById("typing");
-    const messageInput = document.getElementById("messageInput");
 
     function sendMessage() {
-      const text = messageInput.value.trim();
-      if (text !== "") {
-        push(messagesRef, {
-          user: username,
-          text,
-          timestamp: Date.now()
-        });
-        messageInput.value = "";
-        sendTyping(false);
-      }
+      const text = msgInput.value.trim();
+      if (text === "") return;
+      const time = new Date().toLocaleTimeString();
+      db.ref("messages").push({ text, time, user: username });
+      msgInput.value = "";
     }
 
-    function listenForMessages() {
-      onChildAdded(messagesRef, (data) => {
-        const { user, text } = data.val();
-        const id = data.key;
-        const div = document.createElement("div");
-        div.classList.add("message");
-        div.textContent = `${user}: ${text}`;
-        if (user === username || username === "null_1") {
-          const delBtn = document.createElement("button");
-          delBtn.textContent = "❌";
-          delBtn.style.marginLeft = "10px";
-          delBtn.onclick = () => remove(ref(db, `messages/${id}`));
-          div.appendChild(delBtn);
-        }
-        messagesDiv.appendChild(div);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      });
+    db.ref("messages").on("child_added", snap => {
+      const { text, time, user } = snap.val();
+      const div = document.createElement("div");
+      div.className = "msg fade";
+      div.innerHTML = `<div><span class="username">${user}</span>: ${text}</div><div class="timestamp">${time}</div>`;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
 
-      onChildRemoved(messagesRef, (data) => {
-        const id = data.key;
-        [...messagesDiv.children].forEach(msg => {
-          if (msg.textContent.includes(id)) {
-            msg.remove();
-          }
-        });
-        messagesDiv.innerHTML = "";
-        listenForMessages();
-      });
-    }
-
-    let typingTimeout;
-    function sendTyping(active = true) {
-      if (active) {
-        set(ref(db, `typing/${username}`), true);
-        clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(() => set(ref(db, `typing/${username}`), false), 2000);
-      } else {
-        set(ref(db, `typing/${username}`), false);
-      }
-    }
-
-    function listenForTyping() {
-      onChildAdded(typingRef, updateTyping);
-      onChildRemoved(typingRef, updateTyping);
-    }
-
-    function updateTyping() {
-      get(typingRef).then((snapshot) => {
-        const typingUsers = [];
-        snapshot.forEach(child => {
-          if (child.val() && child.key !== username) {
-            typingUsers.push(child.key);
-          }
-        });
-        typingDiv.textContent = typingUsers.length > 0 ? `${typingUsers.join(", ")} is typing...` : "";
-      });
-    }
+    msgInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") sendMessage();
+    });
   </script>
 </body>
 </html>
-
