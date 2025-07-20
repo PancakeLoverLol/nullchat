@@ -2,104 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NullChat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>nullchat.</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #0d0d0d;
       color: #e0f7fa;
-    }
-    .card {
-      background: #111;
-      border-radius: 20px;
-      box-shadow: 0 0 20px #00ffee22;
-      padding: 2em;
-      width: 90%;
-      max-width: 500px;
-      transition: all 0.3s ease;
-    }
-    input, button {
-      margin: 5px;
-      padding: 10px;
-      border-radius: 10px;
-      width: 100%;
-      border: none;
-      outline: none;
-      font-size: 16px;
-      background: #222;
-      color: white;
-    }
-    button {
-      background-color: #1de9b6;
-      color: #000;
-      cursor: pointer;
-    }
-    input:focus, button:hover {
-      outline: none;
-      background: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
     }
     #chat {
+      margin-top: 40px;
       width: 90%;
       max-width: 600px;
-      background-color: #1c1c1c;
+      background: #1c1c1c;
       padding: 20px;
       border-radius: 15px;
       box-shadow: 0 0 10px rgba(29, 233, 182, 0.3);
-      margin: auto;
-      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      height: 70vh;
     }
     #messages {
-      height: 300px;
+      flex: 1;
       overflow-y: auto;
-      border: 1px solid #333;
-      padding: 10px;
-      margin-bottom: 10px;
       background: #111;
+      padding: 1em;
       border-radius: 12px;
+      border: 1px solid #333;
+      margin-bottom: 10px;
     }
     .msg {
       background: #222;
       padding: 0.5em 1em;
       border-radius: 10px;
       margin-bottom: 0.5em;
+      position: relative;
       max-width: 90%;
-    }
-    .timestamp {
-      font-size: 0.7em;
-      color: #888;
+      color: #e0f7fa;
     }
     .username {
       color: #00ffee;
       font-weight: bold;
     }
-    .typing-indicator {
-      font-style: italic;
-      font-size: 12px;
+    .timestamp {
+      font-size: 0.7em;
+      color: #888;
+      margin-left: 10px;
     }
-    @keyframes fadeIn {
-      from {opacity: 0;}
-      to {opacity: 1;}
+    .delete-btn {
+      position: absolute;
+      right: 5px;
+      top: 5px;
+      background: transparent;
+      border: none;
+      color: #f55;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.1em;
     }
-    .fade {
-      animation: fadeIn 0.3s ease;
+    #messageInput {
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      outline: none;
+      font-size: 1em;
+      background: #222;
+      color: white;
+      margin-bottom: 10px;
+    }
+    #sendBtn {
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-size: 1em;
+      background-color: #1de9b6;
+      color: #000;
+      font-weight: bold;
+    }
+    #sendBtn:hover {
+      background-color: #14b38a;
     }
   </style>
 </head>
 <body>
-  <h1 style="text-align:center;">NullChat</h1>
+
+  <h1>nullchat.</h1>
   <div id="chat">
     <div id="messages"></div>
-    <div class="typing-indicator" id="typing"></div>
-    <input type="text" id="messageInput" placeholder="Type a message..." oninput="sendTyping()" />
-    <button onclick="sendMessage()">Send</button>
+    <input type="text" id="messageInput" placeholder="Type your message..." />
+    <button id="sendBtn">Send</button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove, set, get, update } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDU7ocYo8pj-jq1JtBMy6aKlOS57ATvPlg",
@@ -114,89 +116,70 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const messagesRef = ref(db, "messages");
-    const typingRef = ref(db, "typing");
 
-    const ADMIN_LIST = ["shadow-956"];
-    let username = localStorage.getItem("nullchat_username");
-    async function initUser() {
-      if (!username) {
-        const userCountRef = ref(db, "userCount");
-        const snapshot = await get(userCountRef);
-        let count = snapshot.exists() ? snapshot.val() + 1 : 1;
-        username = `null_${count}`;
-        localStorage.setItem("nullchat_username", username);
-        await set(userCountRef, count);
-      }
+    const admins = ['null_1'];
+
+    let username = localStorage.getItem('nullchat_username');
+    if (!username) {
+      username = 'null_' + Math.floor(Math.random() * 10000);
+      localStorage.setItem('nullchat_username', username);
     }
 
-    await initUser();
-    const messageInput = document.getElementById("messageInput");
-    const messagesDiv = document.getElementById("messages");
-    const typingDiv = document.getElementById("typing");
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    sendBtn.onclick = sendMessage;
+    messageInput.onkeydown = (e) => {
+      if (e.key === 'Enter') sendMessage();
+    };
 
     function sendMessage() {
       const text = messageInput.value.trim();
-      if (text !== "") {
-        push(messagesRef, {
-          user: username,
-          text,
-          timestamp: Date.now()
-        });
-        messageInput.value = "";
-        sendTyping(false);
+      if (!text) return;
+      push(messagesRef, {
+        user: username,
+        text,
+        timestamp: Date.now()
+      });
+      messageInput.value = '';
+    }
+
+    onChildAdded(messagesRef, (data) => {
+      const { user, text, timestamp } = data.val();
+      const id = data.key;
+
+      const div = document.createElement('div');
+      div.className = 'msg';
+
+      const userSpan = document.createElement('span');
+      userSpan.className = 'username';
+      userSpan.textContent = user;
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'timestamp';
+      timeSpan.textContent = new Date(timestamp).toLocaleTimeString();
+
+      div.appendChild(userSpan);
+      div.appendChild(document.createTextNode(`: ${text} `));
+      div.appendChild(timeSpan);
+
+      if (user === username || admins.includes(username)) {
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delete-btn';
+        delBtn.textContent = '×';
+        delBtn.title = 'Delete message';
+        delBtn.onclick = () => {
+          remove(ref(db, `messages/${id}`));
+        };
+        div.appendChild(delBtn);
       }
-    }
 
-    function listenForMessages() {
-      onChildAdded(messagesRef, (data) => {
-        const { user, text, timestamp } = data.val();
-        const id = data.key;
-        const div = document.createElement("div");
-        div.classList.add("msg", "fade");
-        div.innerHTML = `<span class="username">${user}</span>: ${text}`;
-        if (user === username || ADMIN_LIST.includes(username)) {
-          const delBtn = document.createElement("button");
-          delBtn.textContent = " ❌ ";
-          delBtn.style.marginLeft = "10px";
-          delBtn.onclick = () => remove(ref(db, `messages/${id}`));
-          div.appendChild(delBtn);
-        }
-        messagesDiv.appendChild(div);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      });
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
 
-      onChildRemoved(messagesRef, () => {
-        messagesDiv.innerHTML = "";
-        listenForMessages();
-      });
-    }
-
-    let typingTimeout;
-    function sendTyping(active = true) {
-      if (active) {
-        set(ref(db, `typing/${username}`), true);
-        clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(() => set(ref(db, `typing/${username}`), false), 2000);
-      } else {
-        set(ref(db, `typing/${username}`), false);
-      }
-    }
-
-    function listenForTyping() {
-      get(typingRef).then((snapshot) => {
-        const typingUsers = [];
-        snapshot.forEach(child => {
-          if (child.val() && child.key !== username) {
-            typingUsers.push(child.key);
-          }
-        });
-        typingDiv.textContent = typingUsers.length > 0 ? `${typingUsers.join(", ")} is typing...` : "";
-      });
-    }
-
-    setInterval(listenForTyping, 1000);
-    listenForMessages();
   </script>
+
 </body>
 </html>
-
