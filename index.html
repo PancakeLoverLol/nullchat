@@ -7,105 +7,77 @@
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #0d0d0d;
       color: #e0f7fa;
     }
     #passwordScreen, #mainContent {
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
     }
-    #passwordScreen input {
+    #mainContent {
+      display: none;
+    }
+    input, button {
+      margin: 5px;
       padding: 10px;
-      margin-bottom: 10px;
+      border-radius: 10px;
       border: none;
-      border-radius: 8px;
+      outline: none;
       font-size: 16px;
     }
-    #passwordScreen button {
-      padding: 10px 20px;
-      background-color: #2196f3;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-size: 16px;
+    button {
+      background-color: #1de9b6;
+      color: #000;
       cursor: pointer;
     }
-    #chatBox {
+    #chat {
       width: 90%;
       max-width: 600px;
-      height: 400px;
-      overflow-y: scroll;
+      background-color: #1c1c1c;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(29, 233, 182, 0.3);
+    }
+    #messages {
+      height: 300px;
+      overflow-y: auto;
       border: 1px solid #333;
-      border-radius: 8px;
       padding: 10px;
-      background-color: #111;
       margin-bottom: 10px;
     }
     .message {
-      margin: 5px 0;
-      padding: 8px;
-      background: #222;
-      border-radius: 6px;
-    }
-    .ownMessage {
-      background: #004d40;
-    }
-    #messageInput {
-      width: 80%;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      margin-right: 10px;
-    }
-    #sendBtn {
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      background: #00bcd4;
-      color: white;
-      cursor: pointer;
-    }
-    #typingStatus {
-      font-size: 12px;
-      color: #90caf9;
       margin-bottom: 10px;
+    }
+    .typing-indicator {
+      font-style: italic;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
   <div id="passwordScreen">
-    <input type="password" id="passwordInput" placeholder="Enter password">
+    <input type="password" id="passwordInput" placeholder="Enter password" />
     <button onclick="checkPassword()">Enter</button>
   </div>
 
-  <div id="mainContent" style="display: none; flex-direction: column; align-items: center; padding: 20px;">
+  <div id="mainContent">
     <h1>NullChat</h1>
-    <div id="typingStatus"></div>
-    <div id="chatBox"></div>
-    <div>
-      <input type="text" id="messageInput" placeholder="Type your message..." oninput="setTyping()">
-      <button id="sendBtn" onclick="sendMessage()">Send</button>
+    <div id="chat">
+      <div id="messages"></div>
+      <div class="typing-indicator" id="typing"></div>
+      <input type="text" id="messageInput" placeholder="Type a message..." oninput="sendTyping()" />
+      <button onclick="sendMessage()">Send</button>
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-  <script>
-    const correctPassword = "nullscapes";
-
-    function checkPassword() {
-      const input = document.getElementById("passwordInput").value;
-      if (input === correctPassword) {
-        document.getElementById("passwordScreen").style.display = "none";
-        document.getElementById("mainContent").style.display = "flex";
-      } else {
-        alert("Wrong password");
-      }
-    }
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove, set, get, child, update } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDU7ocYo8pj-jq1JtBMy6aKlOS57ATvPlg",
@@ -116,58 +88,113 @@
       messagingSenderId: "822668504447",
       appId: "1:822668504447:web:350ff354d5b13f8cc8fe4a"
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const password = "nullscapes";
+    const passwordScreen = document.getElementById("passwordScreen");
+    const mainContent = document.getElementById("mainContent");
+
+    function checkPassword() {
+      const input = document.getElementById("passwordInput").value;
+      if (input === password) {
+        passwordScreen.style.display = "none";
+        mainContent.style.display = "flex";
+        initUser();
+        listenForMessages();
+        listenForTyping();
+      }
+    }
 
     let username = localStorage.getItem("nullchat_username");
-    if (!username) {
-      db.ref("userCount").transaction(count => (count || 0) + 1).then(res => {
-        username = `null_${res.snapshot.val()}`;
+    async function initUser() {
+      if (!username) {
+        const userCountRef = ref(db, "userCount");
+        const snapshot = await get(userCountRef);
+        let count = snapshot.exists() ? snapshot.val() + 1 : 1;
+        username = `null_${count}`;
         localStorage.setItem("nullchat_username", username);
-      });
+        await set(userCountRef, count);
+      }
     }
+
+    const messagesRef = ref(db, "messages");
+    const typingRef = ref(db, "typing");
+    const messagesDiv = document.getElementById("messages");
+    const typingDiv = document.getElementById("typing");
+    const messageInput = document.getElementById("messageInput");
 
     function sendMessage() {
-      const msg = document.getElementById("messageInput").value.trim();
-      if (!msg) return;
-      db.ref("messages").push({
-        sender: username,
-        text: msg,
-        time: Date.now()
-      });
-      document.getElementById("messageInput").value = "";
-      db.ref("typing").child(username).remove();
+      const text = messageInput.value.trim();
+      if (text !== "") {
+        push(messagesRef, {
+          user: username,
+          text,
+          timestamp: Date.now()
+        });
+        messageInput.value = "";
+        sendTyping(false);
+      }
     }
 
-    function displayMessages(snapshot) {
-      const chatBox = document.getElementById("chatBox");
-      chatBox.innerHTML = "";
-      snapshot.forEach(child => {
-        const msg = child.val();
+    function listenForMessages() {
+      onChildAdded(messagesRef, (data) => {
+        const { user, text } = data.val();
+        const id = data.key;
         const div = document.createElement("div");
-        div.className = "message" + (msg.sender === username ? " ownMessage" : "");
-        div.textContent = `${msg.sender}: ${msg.text}`;
-        chatBox.appendChild(div);
+        div.classList.add("message");
+        div.textContent = `${user}: ${text}`;
+        if (user === username || username === "null_1") {
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "❌";
+          delBtn.style.marginLeft = "10px";
+          delBtn.onclick = () => remove(ref(db, `messages/${id}`));
+          div.appendChild(delBtn);
+        }
+        messagesDiv.appendChild(div);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });
-      chatBox.scrollTop = chatBox.scrollHeight;
+
+      onChildRemoved(messagesRef, (data) => {
+        const id = data.key;
+        [...messagesDiv.children].forEach(msg => {
+          if (msg.textContent.includes(id)) {
+            msg.remove();
+          }
+        });
+        messagesDiv.innerHTML = "";
+        listenForMessages();
+      });
     }
 
-    db.ref("messages").on("value", displayMessages);
-
-    function setTyping() {
-      db.ref("typing").child(username).set(true);
-      setTimeout(() => db.ref("typing").child(username).remove(), 3000);
+    let typingTimeout;
+    function sendTyping(active = true) {
+      if (active) {
+        set(ref(db, `typing/${username}`), true);
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => set(ref(db, `typing/${username}`), false), 2000);
+      } else {
+        set(ref(db, `typing/${username}`), false);
+      }
     }
 
-    db.ref("typing").on("value", snapshot => {
-      let typingUsers = [];
-      snapshot.forEach(child => {
-        if (child.key !== username) typingUsers.push(child.key);
+    function listenForTyping() {
+      onChildAdded(typingRef, updateTyping);
+      onChildRemoved(typingRef, updateTyping);
+    }
+
+    function updateTyping() {
+      get(typingRef).then((snapshot) => {
+        const typingUsers = [];
+        snapshot.forEach(child => {
+          if (child.val() && child.key !== username) {
+            typingUsers.push(child.key);
+          }
+        });
+        typingDiv.textContent = typingUsers.length > 0 ? `${typingUsers.join(", ")} is typing...` : "";
       });
-      document.getElementById("typingStatus").textContent = typingUsers.length
-        ? `${typingUsers.join(", ")} is typing...`
-        : "";
-    });
+    }
   </script>
 </body>
 </html>
