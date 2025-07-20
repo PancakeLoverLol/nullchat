@@ -72,6 +72,11 @@
       color: #888;
     }
 
+    .username {
+      color: #00ffee;
+      font-weight: bold;
+    }
+
     @keyframes fadeIn {
       from {opacity: 0;}
       to {opacity: 1;}
@@ -115,44 +120,55 @@
       }
     }
 
-    // ✅ Firebase config (yours)
+    // 🆔 Get or create persistent anonymous username
+    function getAnonUsername() {
+      let id = localStorage.getItem("nullchat_user");
+      if (!id) {
+        const prefix = ["anon", "ghost", "shadow", "null"];
+        const pick = prefix[Math.floor(Math.random() * prefix.length)];
+        const suffix = Math.random().toString(16).slice(2, 5);
+        id = `${pick}-${suffix}`;
+        localStorage.setItem("nullchat_user", id);
+      }
+      return id;
+    }
+
+    const username = getAnonUsername();
+
+    // ✅ Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDU7ocYo8pj-jq1JtBMy6aKlOS57ATvPlg",
       authDomain: "nullchat-e0243.firebaseapp.com",
       databaseURL: "https://nullchat-e0243-default-rtdb.firebaseio.com",
       projectId: "nullchat-e0243",
-      storageBucket: "nullchat-e0243.firebasestorage.app",
+      storageBucket: "nullchat-e0243.appspot.com",
       messagingSenderId: "822668504447",
       appId: "1:822668504447:web:350ff354d5b13f8cc8fe4a"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     const msgInput = document.getElementById("msgInput");
     const messagesDiv = document.getElementById("messages");
 
-    // Send message
     function sendMessage() {
       const text = msgInput.value.trim();
       if (text === "") return;
       const time = new Date().toLocaleTimeString();
-      db.ref("messages").push({ text, time });
+      db.ref("messages").push({ text, time, user: username });
       msgInput.value = "";
     }
 
-    // Listen for new messages
     db.ref("messages").on("child_added", snap => {
-      const { text, time } = snap.val();
+      const { text, time, user } = snap.val();
       const div = document.createElement("div");
       div.className = "msg fade";
-      div.innerHTML = `<div>${text}</div><div class="timestamp">${time}</div>`;
+      div.innerHTML = `<div><span class="username">${user}</span>: ${text}</div><div class="timestamp">${time}</div>`;
       messagesDiv.appendChild(div);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     });
 
-    // Send with Enter key
     msgInput.addEventListener("keydown", e => {
       if (e.key === "Enter") sendMessage();
     });
