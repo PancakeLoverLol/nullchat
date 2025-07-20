@@ -44,6 +44,7 @@
     position: relative;
     max-width: 90%;
     color: #e0f7fa;
+    transition: opacity 0.5s ease, height 0.5s ease, margin 0.5s ease, padding 0.5s ease;
   }
   .username {
     color: #00ffee;
@@ -88,6 +89,14 @@
   #sendBtn:hover {
     background-color: #14b38a;
   }
+  .fade-out {
+    opacity: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    transition: opacity 0.5s ease, height 0.5s ease, margin 0.5s ease, padding 0.5s ease;
+  }
 </style>
 </head>
 <body>
@@ -101,7 +110,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-  import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+  import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDU7ocYo8pj-jq1JtBMy6aKlOS57ATvPlg",
@@ -117,7 +126,8 @@
   const db = getDatabase(app);
   const messagesRef = ref(db, "messages");
 
-  const admins = ['null_2']; // your admin list
+  // Admin list: only null_2 is admin now
+  const admins = ['null_2'];
 
   let username = localStorage.getItem('nullchat_username');
   if (!username) {
@@ -145,12 +155,14 @@
     messageInput.value = '';
   }
 
+  // When new messages are added, display them
   onChildAdded(messagesRef, (data) => {
     const { user, text, timestamp } = data.val();
     const id = data.key;
 
     const div = document.createElement('div');
     div.className = 'msg';
+    div.dataset.key = id;
 
     const userSpan = document.createElement('span');
     userSpan.className = 'username';
@@ -170,8 +182,6 @@
       delBtn.textContent = '×';
       delBtn.title = 'Delete message';
       delBtn.onclick = () => {
-        // DEBUG LOGGING:
-        console.log('Attempting to remove message:', id);
         remove(ref(db, `messages/${id}`)).catch(err => {
           alert('Failed to delete message: ' + err.message);
         });
@@ -181,6 +191,18 @@
 
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
+
+  // When messages are deleted, fade them out before removing from DOM
+  onChildRemoved(messagesRef, (data) => {
+    const id = data.key;
+    const msgElements = document.querySelectorAll('.msg');
+    msgElements.forEach(msg => {
+      if (msg.dataset.key === id) {
+        msg.classList.add('fade-out');
+        setTimeout(() => msg.remove(), 500);
+      }
+    });
   });
 </script>
 
