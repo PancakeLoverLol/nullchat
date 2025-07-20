@@ -1,189 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>nullchat.</title>
-  <style>
-    body {
-      margin: 0; padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #0d0d0d;
-      color: #e0f7fa;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-    #chat {
-      margin-top: 40px;
-      width: 90%;
-      max-width: 600px;
-      background: #1c1c1c;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 0 10px rgba(29, 233, 182, 0.3);
-      display: flex;
-      flex-direction: column;
-      height: 70vh;
-    }
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      background: #111;
-      padding: 1em;
-      border-radius: 12px;
-      border: 1px solid #333;
-      margin-bottom: 10px;
-    }
-    .msg {
-      background: #222;
-      padding: 0.5em 1em;
-      border-radius: 10px;
-      margin-bottom: 0.5em;
-      position: relative;
-      max-width: 90%;
-      color: #e0f7fa;
-    }
-    .username {
-      color: #00ffee;
-      font-weight: bold;
-    }
-    .timestamp {
-      font-size: 0.7em;
-      color: #888;
-      margin-left: 10px;
-    }
-    .delete-btn {
-      position: absolute;
-      right: 5px;
-      top: 5px;
-      background: transparent;
-      border: none;
-      color: #f55;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 1.1em;
-    }
-    #messageInput {
-      padding: 10px;
-      border-radius: 12px;
-      border: none;
-      outline: none;
-      font-size: 1em;
-      background: #222;
-      color: white;
-      margin-bottom: 10px;
-    }
-    #sendBtn {
-      padding: 10px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      font-size: 1em;
-      background-color: #1de9b6;
-      color: #000;
-      font-weight: bold;
-    }
-    #sendBtn:hover {
-      background-color: #14b38a;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>nullchat.</title>
+<style>
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #0d0d0d;
+    color: #e0f7fa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  #chat {
+    margin-top: 40px;
+    width: 90%;
+    max-width: 600px;
+    background: #1c1c1c;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(29, 233, 182, 0.3);
+    display: flex;
+    flex-direction: column;
+    height: 70vh;
+  }
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    background: #111;
+    padding: 1em;
+    border-radius: 12px;
+    border: 1px solid #333;
+    margin-bottom: 10px;
+  }
+  .msg {
+    background: #222;
+    padding: 0.5em 1em;
+    border-radius: 10px;
+    margin-bottom: 0.5em;
+    position: relative;
+    max-width: 90%;
+    color: #e0f7fa;
+  }
+  .username {
+    color: #00ffee;
+    font-weight: bold;
+  }
+  .timestamp {
+    font-size: 0.7em;
+    color: #888;
+    margin-left: 10px;
+  }
+  .delete-btn {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    background: transparent;
+    border: none;
+    color: #f55;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1.1em;
+  }
+  #messageInput {
+    padding: 10px;
+    border-radius: 12px;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    background: #222;
+    color: white;
+    margin-bottom: 10px;
+  }
+  #sendBtn {
+    padding: 10px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    background-color: #1de9b6;
+    color: #000;
+    font-weight: bold;
+  }
+  #sendBtn:hover {
+    background-color: #14b38a;
+  }
+</style>
 </head>
 <body>
 
-  <h1>nullchat.</h1>
-  <div id="chat">
-    <div id="messages"></div>
-    <input type="text" id="messageInput" placeholder="Type your message..." />
-    <button id="sendBtn">Send</button>
-  </div>
+<h1>nullchat.</h1>
+<div id="chat">
+  <div id="messages"></div>
+  <input type="text" id="messageInput" placeholder="Type your message..." />
+  <button id="sendBtn">Send</button>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+  import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDU7ocYo8pj-jq1JtBMy6aKlOS57ATvPlg",
-      authDomain: "nullchat-e0243.firebaseapp.com",
-      databaseURL: "https://nullchat-e0243-default-rtdb.firebaseio.com",
-      projectId: "nullchat-e0243",
-      storageBucket: "nullchat-e0243.appspot.com",
-      messagingSenderId: "822668504447",
-      appId: "1:822668504447:web:350ff354d5b13f8cc8fe4a"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyDU7ocYo8pj-jq1JtBMy6aKlOS57ATvPlg",
+    authDomain: "nullchat-e0243.firebaseapp.com",
+    databaseURL: "https://nullchat-e0243-default-rtdb.firebaseio.com",
+    projectId: "nullchat-e0243",
+    storageBucket: "nullchat-e0243.appspot.com",
+    messagingSenderId: "822668504447",
+    appId: "1:822668504447:web:350ff354d5b13f8cc8fe4a"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const messagesRef = ref(db, "messages");
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const messagesRef = ref(db, "messages");
 
-    // Only null_2 is admin now
-    const admins = ['null_2'];
+  const admins = ['null_2']; // your admin list
 
-    let username = localStorage.getItem('nullchat_username');
-    if (!username) {
-      username = 'null_' + Math.floor(Math.random() * 10000);
-      localStorage.setItem('nullchat_username', username);
-    }
+  let username = localStorage.getItem('nullchat_username');
+  if (!username) {
+    username = 'null_' + Math.floor(Math.random() * 10000);
+    localStorage.setItem('nullchat_username', username);
+  }
 
-    const messagesDiv = document.getElementById('messages');
-    const messageInput = document.getElementById('messageInput');
-    const sendBtn = document.getElementById('sendBtn');
+  const messagesDiv = document.getElementById('messages');
+  const messageInput = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
 
-    sendBtn.onclick = sendMessage;
-    messageInput.onkeydown = (e) => {
-      if (e.key === 'Enter') sendMessage();
-    };
+  sendBtn.onclick = sendMessage;
+  messageInput.onkeydown = (e) => {
+    if (e.key === 'Enter') sendMessage();
+  };
 
-    function sendMessage() {
-      const text = messageInput.value.trim();
-      if (!text) return;
-      push(messagesRef, {
-        user: username,
-        text,
-        timestamp: Date.now()
-      });
-      messageInput.value = '';
-    }
-
-    onChildAdded(messagesRef, (data) => {
-      const { user, text, timestamp } = data.val();
-      const id = data.key;
-
-      const div = document.createElement('div');
-      div.className = 'msg';
-
-      const userSpan = document.createElement('span');
-      userSpan.className = 'username';
-      userSpan.textContent = user;
-
-      const timeSpan = document.createElement('span');
-      timeSpan.className = 'timestamp';
-      timeSpan.textContent = new Date(timestamp).toLocaleTimeString();
-
-      div.appendChild(userSpan);
-      div.appendChild(document.createTextNode(`: ${text} `));
-      div.appendChild(timeSpan);
-
-      // Delete button if message sender or admin
-      if (user === username || admins.includes(username)) {
-        const delBtn = document.createElement('button');
-        delBtn.className = 'delete-btn';
-        delBtn.textContent = '×';
-        delBtn.title = 'Delete message';
-        delBtn.onclick = () => {
-          remove(ref(db, `messages/${id}`)).catch(err => {
-            alert('Failed to delete message: ' + err.message);
-          });
-        };
-        div.appendChild(delBtn);
-      }
-
-      messagesDiv.appendChild(div);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  function sendMessage() {
+    const text = messageInput.value.trim();
+    if (!text) return;
+    push(messagesRef, {
+      user: username,
+      text,
+      timestamp: Date.now()
     });
-  </script>
+    messageInput.value = '';
+  }
+
+  onChildAdded(messagesRef, (data) => {
+    const { user, text, timestamp } = data.val();
+    const id = data.key;
+
+    const div = document.createElement('div');
+    div.className = 'msg';
+
+    const userSpan = document.createElement('span');
+    userSpan.className = 'username';
+    userSpan.textContent = user;
+
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'timestamp';
+    timeSpan.textContent = new Date(timestamp).toLocaleTimeString();
+
+    div.appendChild(userSpan);
+    div.appendChild(document.createTextNode(`: ${text} `));
+    div.appendChild(timeSpan);
+
+    if (user === username || admins.includes(username)) {
+      const delBtn = document.createElement('button');
+      delBtn.className = 'delete-btn';
+      delBtn.textContent = '×';
+      delBtn.title = 'Delete message';
+      delBtn.onclick = () => {
+        // DEBUG LOGGING:
+        console.log('Attempting to remove message:', id);
+        remove(ref(db, `messages/${id}`)).catch(err => {
+          alert('Failed to delete message: ' + err.message);
+        });
+      };
+      div.appendChild(delBtn);
+    }
+
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
+</script>
 
 </body>
 </html>
-
