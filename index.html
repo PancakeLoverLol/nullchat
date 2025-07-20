@@ -8,77 +8,103 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background-color: #0f0f0f;
+      background-color: #0d0d0d;
       color: #e0f7fa;
     }
     #passwordScreen, #mainContent {
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
-      gap: 10px;
     }
-    input, button, select {
+    #passwordScreen input {
+      padding: 10px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    #passwordScreen button {
+      padding: 10px 20px;
+      background-color: #2196f3;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #chatBox {
+      width: 90%;
+      max-width: 600px;
+      height: 400px;
+      overflow-y: scroll;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 10px;
+      background-color: #111;
+      margin-bottom: 10px;
+    }
+    .message {
+      margin: 5px 0;
+      padding: 8px;
+      background: #222;
+      border-radius: 6px;
+    }
+    .ownMessage {
+      background: #004d40;
+    }
+    #messageInput {
+      width: 80%;
       padding: 10px;
       border: none;
       border-radius: 8px;
-      background-color: #1a1a1a;
-      color: #e0f7fa;
-      box-shadow: 0 0 5px #26c6da;
+      margin-right: 10px;
     }
-    #chatBox {
-      height: 400px;
-      width: 80%;
-      max-width: 800px;
-      overflow-y: scroll;
-      border: 1px solid #26c6da;
+    #sendBtn {
       padding: 10px;
-      background-color: #121212;
-      margin-bottom: 10px;
+      border: none;
       border-radius: 8px;
+      background: #00bcd4;
+      color: white;
+      cursor: pointer;
     }
-    .message {
+    #typingStatus {
+      font-size: 12px;
+      color: #90caf9;
       margin-bottom: 10px;
-    }
-    .typing {
-      font-style: italic;
-      color: #80deea;
     }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
 <body>
   <div id="passwordScreen">
-    <input type="password" id="passwordInput" placeholder="Enter password" />
+    <input type="password" id="passwordInput" placeholder="Enter password">
     <button onclick="checkPassword()">Enter</button>
   </div>
-  <div id="mainContent" style="display:none; flex-direction:column; align-items:center;">
+
+  <div id="mainContent" style="display: none; flex-direction: column; align-items: center; padding: 20px;">
     <h1>NullChat</h1>
-    <div id="userInfo"></div>
-    <select id="clanSelect"></select>
-    <input id="clanName" placeholder="Create/Join clan" />
-    <button onclick="joinClan()">Join/Create Clan</button>
-    <div id="chatBox"></div>
-    <input id="messageInput" placeholder="Type your message..." oninput="sendTypingStatus(true)" onblur="sendTypingStatus(false)" />
-    <button onclick="sendMessage()">Send</button>
     <div id="typingStatus"></div>
+    <div id="chatBox"></div>
+    <div>
+      <input type="text" id="messageInput" placeholder="Type your message..." oninput="setTyping()">
+      <button id="sendBtn" onclick="sendMessage()">Send</button>
+    </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
   <script>
     const correctPassword = "nullscapes";
+
     function checkPassword() {
       const input = document.getElementById("passwordInput").value;
       if (input === correctPassword) {
-        localStorage.setItem("unlocked", "true");
         document.getElementById("passwordScreen").style.display = "none";
         document.getElementById("mainContent").style.display = "flex";
+      } else {
+        alert("Wrong password");
       }
-    }
-    if (localStorage.getItem("unlocked") === "true") {
-      document.getElementById("passwordScreen").style.display = "none";
-      document.getElementById("mainContent").style.display = "flex";
     }
 
     const firebaseConfig = {
@@ -90,106 +116,57 @@
       messagingSenderId: "822668504447",
       appId: "1:822668504447:web:350ff354d5b13f8cc8fe4a"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let username = localStorage.getItem("username");
+    let username = localStorage.getItem("nullchat_username");
     if (!username) {
-      db.ref("userCount").transaction(current => (current || 0) + 1).then(result => {
-        username = `null_${result.snapshot.val()}`;
-        localStorage.setItem("username", username);
-        document.getElementById("userInfo").innerText = `Logged in as ${username}`;
-      });
-    } else {
-      document.getElementById("userInfo").innerText = `Logged in as ${username}`;
-    }
-
-    let userClan = "";
-
-    function joinClan() {
-      const clan = document.getElementById("clanName").value.trim();
-      if (!clan) return;
-      db.ref(`clans/${clan}/members/${username}`).set(true);
-      userClan = clan;
-      localStorage.setItem("userClan", clan);
-      loadClans();
-    }
-
-    function loadClans() {
-      db.ref("clans").once("value").then(snapshot => {
-        const clanSelect = document.getElementById("clanSelect");
-        clanSelect.innerHTML = "";
-        snapshot.forEach(clanSnap => {
-          const clanName = clanSnap.key;
-          const option = document.createElement("option");
-          option.value = clanName;
-          option.innerText = clanName;
-          clanSelect.appendChild(option);
-        });
-      });
-    }
-
-    loadClans();
-
-    db.ref("messages").on("child_added", snapshot => {
-      const msg = snapshot.val();
-      const div = document.createElement("div");
-      div.className = "message";
-      div.innerHTML = `<strong>${msg.user}</strong> [${msg.clan || "-"}]: ${msg.text}`;
-      if (msg.user === username || isAdmin(username)) {
-        const delBtn = document.createElement("button");
-        delBtn.innerText = "Delete";
-        delBtn.onclick = () => db.ref("messages/" + snapshot.key).remove();
-        div.appendChild(delBtn);
-      }
-      document.getElementById("chatBox").appendChild(div);
-      document.getElementById("chatBox").scrollTop = document.getElementById("chatBox").scrollHeight;
-    });
-
-    db.ref("messages").on("child_removed", snapshot => {
-      loadMessages();
-    });
-
-    function loadMessages() {
-      document.getElementById("chatBox").innerHTML = "";
-      db.ref("messages").once("value", snap => {
-        snap.forEach(child => {
-          const msg = child.val();
-          const div = document.createElement("div");
-          div.className = "message";
-          div.innerHTML = `<strong>${msg.user}</strong> [${msg.clan || "-"}]: ${msg.text}`;
-          document.getElementById("chatBox").appendChild(div);
-        });
+      db.ref("userCount").transaction(count => (count || 0) + 1).then(res => {
+        username = `null_${res.snapshot.val()}`;
+        localStorage.setItem("nullchat_username", username);
       });
     }
 
     function sendMessage() {
-      const text = document.getElementById("messageInput").value;
-      const clan = userClan || localStorage.getItem("userClan") || "-";
-      if (!text.trim()) return;
-      db.ref("messages").push({ user: username, text, clan });
-      document.getElementById("messageInput").value = "";
-      sendTypingStatus(false);
-    }
-
-    function isAdmin(name) {
-      const admins = ["null_1"];
-      return admins.includes(name);
-    }
-
-    function sendTypingStatus(isTyping) {
-      db.ref("typing/" + username).set(isTyping);
-    }
-
-    db.ref("typing").on("value", snap => {
-      let typingUsers = [];
-      snap.forEach(child => {
-        if (child.val() && child.key !== username) {
-          typingUsers.push(child.key);
-        }
+      const msg = document.getElementById("messageInput").value.trim();
+      if (!msg) return;
+      db.ref("messages").push({
+        sender: username,
+        text: msg,
+        time: Date.now()
       });
-      document.getElementById("typingStatus").innerText = typingUsers.length ? `${typingUsers.join(", ")} typing...` : "";
+      document.getElementById("messageInput").value = "";
+      db.ref("typing").child(username).remove();
+    }
+
+    function displayMessages(snapshot) {
+      const chatBox = document.getElementById("chatBox");
+      chatBox.innerHTML = "";
+      snapshot.forEach(child => {
+        const msg = child.val();
+        const div = document.createElement("div");
+        div.className = "message" + (msg.sender === username ? " ownMessage" : "");
+        div.textContent = `${msg.sender}: ${msg.text}`;
+        chatBox.appendChild(div);
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    db.ref("messages").on("value", displayMessages);
+
+    function setTyping() {
+      db.ref("typing").child(username).set(true);
+      setTimeout(() => db.ref("typing").child(username).remove(), 3000);
+    }
+
+    db.ref("typing").on("value", snapshot => {
+      let typingUsers = [];
+      snapshot.forEach(child => {
+        if (child.key !== username) typingUsers.push(child.key);
+      });
+      document.getElementById("typingStatus").textContent = typingUsers.length
+        ? `${typingUsers.join(", ")} is typing...`
+        : "";
     });
   </script>
 </body>
