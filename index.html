@@ -1,226 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>nullchat.</title>
-<style>
-  body {
-    margin: 0; padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #ffffff;
-    color: #111;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-  }
-  #chat {
-    margin-top: 40px;
-    width: 90%;
-    max-width: 600px;
-    background: #f5f5f5;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    height: 70vh;
-  }
-  #messages {
-    flex: 1;
-    overflow-y: auto;
-    background: #eee;
-    padding: 1em;
-    border-radius: 12px;
-    border: 1px solid #ccc;
-    margin-bottom: 10px;
-  }
-  .msg {
-    background: #ddd;
-    padding: 0.5em 1em;
-    border-radius: 10px;
-    margin-bottom: 0.5em;
-    position: relative;
-    max-width: 90%;
-    color: #000;
-    transition: opacity 0.5s ease, height 0.5s ease, margin 0.5s ease, padding 0.5s ease;
-  }
-  .username {
-    color: #0044ff;
-    font-weight: bold;
-  }
-  .timestamp {
-    font-size: 0.7em;
-    color: #666;
-    margin-left: 10px;
-  }
-  .delete-btn {
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    background: transparent;
-    border: none;
-    color: #d00;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 1.1em;
-  }
-  #messageInput {
-    padding: 10px;
-    border-radius: 12px;
-    border: none;
-    outline: none;
-    font-size: 1em;
-    background: #ddd;
-    color: #000;
-    margin-bottom: 10px;
-  }
-  #sendBtn {
-    padding: 10px;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    font-size: 1em;
-    background-color: #0044ff;
-    color: #fff;
-    font-weight: bold;
-  }
-  #sendBtn:hover {
-    background-color: #0033cc;
-  }
-  .fade-out {
-    opacity: 0 !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    transition: opacity 0.5s ease, height 0.5s ease, margin 0.5s ease, padding 0.5s ease;
-  }
-  #changelog {
-    margin-top: 20px;
-    width: 90%;
-    max-width: 600px;
-    font-size: 0.9em;
-    background: #fafafa;
-    border: 1px solid #ccc;
-    padding: 15px;
-    border-radius: 10px;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>nullchat.</title>
+  <style>
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    .slogan {
+      font-size: 0.9em;
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+    #chat {
+      width: 90%;
+      max-width: 600px;
+      background: #111;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      height: 70vh;
+    }
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      background: #000;
+      padding: 1em;
+      border-radius: 12px;
+      border: 1px solid #333;
+      margin-bottom: 10px;
+    }
+    .msg {
+      background: #222;
+      padding: 0.5em 1em;
+      border-radius: 10px;
+      margin-bottom: 0.5em;
+      position: relative;
+      max-width: 90%;
+      color: #fff;
+      transition: opacity 0.5s ease, height 0.5s ease, margin 0.5s ease, padding 0.5s ease;
+    }
+    .username {
+      color: #fff;
+      font-weight: bold;
+    }
+    .timestamp {
+      font-size: 0.7em;
+      color: #888;
+      margin-left: 10px;
+    }
+    .delete-btn {
+      position: absolute;
+      right: 5px;
+      top: 5px;
+      background: transparent;
+      border: none;
+      color: #f55;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.1em;
+    }
+    #messageInput {
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      outline: none;
+      font-size: 1em;
+      background: #222;
+      color: white;
+      margin-bottom: 10px;
+    }
+    #sendBtn {
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-size: 1em;
+      background-color: #fff;
+      color: #000;
+      font-weight: bold;
+    }
+    #sendBtn:hover {
+      background-color: #ddd;
+    }
+    .fade-out {
+      opacity: 0 !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      transition: opacity 0.5s ease, height 0.5s ease, margin 0.5s ease, padding 0.5s ease;
+    }
+  </style>
 </head>
 <body>
 
-<h1>nullchat.</h1>
-<div id="chat">
-  <div id="messages"></div>
-  <input type="text" id="messageInput" placeholder="Type your message..." />
-  <button id="sendBtn">Send</button>
-</div>
+  <h1>nullchat.</h1>
+  <div class="slogan">Say nothing. Mean everything.</div>
+  <div id="chat">
+    <div id="messages"></div>
+    <input type="text" id="messageInput" placeholder="Type your message..." />
+    <button id="sendBtn">Send</button>
+  </div>
 
-<div id="changelog">
-  <strong>Changelog</strong>
-  <ul>
-    <li>Changed main theme color to white</li>
-    <li>Removed clans system</li>
-    <li>Added fade-out animation for deleted messages</li>
-  </ul>
-</div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-  import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyDU7ocYo8pj-jq1JtBMy6aKlOS57ATvPlg",
+      authDomain: "nullchat-e0243.firebaseapp.com",
+      databaseURL: "https://nullchat-e0243-default-rtdb.firebaseio.com",
+      projectId: "nullchat-e0243",
+      storageBucket: "nullchat-e0243.appspot.com",
+      messagingSenderId: "822668504447",
+      appId: "1:822668504447:web:350ff354d5b13f8cc8fe4a"
+    };
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDU7ocYo8pj-jq1JtBMy6aKlOS57ATvPlg",
-    authDomain: "nullchat-e0243.firebaseapp.com",
-    databaseURL: "https://nullchat-e0243-default-rtdb.firebaseio.com",
-    projectId: "nullchat-e0243",
-    storageBucket: "nullchat-e0243.appspot.com",
-    messagingSenderId: "822668504447",
-    appId: "1:822668504447:web:350ff354d5b13f8cc8fe4a"
-  };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const messagesRef = ref(db, "messages");
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const messagesRef = ref(db, "messages");
+    const admins = ['null_2'];
 
-  const admins = ['null_2'];
-
-  let username = localStorage.getItem('nullchat_username');
-  if (!username) {
-    username = 'null_' + Math.floor(Math.random() * 10000);
-    localStorage.setItem('nullchat_username', username);
-  }
-
-  const messagesDiv = document.getElementById('messages');
-  const messageInput = document.getElementById('messageInput');
-  const sendBtn = document.getElementById('sendBtn');
-
-  sendBtn.onclick = sendMessage;
-  messageInput.onkeydown = (e) => {
-    if (e.key === 'Enter') sendMessage();
-  };
-
-  function sendMessage() {
-    const text = messageInput.value.trim();
-    if (!text) return;
-    push(messagesRef, {
-      user: username,
-      text,
-      timestamp: Date.now()
-    });
-    messageInput.value = '';
-  }
-
-  onChildAdded(messagesRef, (data) => {
-    const { user, text, timestamp } = data.val();
-    const id = data.key;
-
-    const div = document.createElement('div');
-    div.className = 'msg';
-    div.dataset.key = id;
-
-    const userSpan = document.createElement('span');
-    userSpan.className = 'username';
-    userSpan.textContent = user;
-
-    const timeSpan = document.createElement('span');
-    timeSpan.className = 'timestamp';
-    timeSpan.textContent = new Date(timestamp).toLocaleTimeString();
-
-    div.appendChild(userSpan);
-    div.appendChild(document.createTextNode(`: ${text} `));
-    div.appendChild(timeSpan);
-
-    if (user === username || admins.includes(username)) {
-      const delBtn = document.createElement('button');
-      delBtn.className = 'delete-btn';
-      delBtn.textContent = '×';
-      delBtn.title = 'Delete message';
-      delBtn.onclick = () => {
-        remove(ref(db, `messages/${id}`)).catch(err => {
-          alert('Failed to delete message: ' + err.message);
-        });
-      };
-      div.appendChild(delBtn);
+    let username = localStorage.getItem('nullchat_username');
+    if (!username) {
+      username = 'null_' + Math.floor(Math.random() * 10000);
+      localStorage.setItem('nullchat_username', username);
     }
 
-    messagesDiv.appendChild(div);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  });
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
 
-  onChildRemoved(messagesRef, (data) => {
-    const id = data.key;
-    const msgElements = document.querySelectorAll('.msg');
-    msgElements.forEach(msg => {
-      if (msg.dataset.key === id) {
-        msg.classList.add('fade-out');
-        setTimeout(() => msg.remove(), 500);
+    sendBtn.onclick = sendMessage;
+    messageInput.onkeydown = (e) => {
+      if (e.key === 'Enter') sendMessage();
+    };
+
+    function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text) return;
+      push(messagesRef, {
+        user: username,
+        text,
+        timestamp: Date.now()
+      });
+      messageInput.value = '';
+    }
+
+    onChildAdded(messagesRef, (data) => {
+      const { user, text, timestamp } = data.val();
+      const id = data.key;
+
+      const div = document.createElement('div');
+      div.className = 'msg';
+      div.dataset.key = id;
+
+      const userSpan = document.createElement('span');
+      userSpan.className = 'username';
+      userSpan.textContent = user;
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'timestamp';
+      timeSpan.textContent = new Date(timestamp).toLocaleTimeString();
+
+      div.appendChild(userSpan);
+      div.appendChild(document.createTextNode(`: ${text} `));
+      div.appendChild(timeSpan);
+
+      if (user === username || admins.includes(username)) {
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delete-btn';
+        delBtn.textContent = '×';
+        delBtn.title = 'Delete message';
+        delBtn.onclick = () => {
+          remove(ref(db, `messages/${id}`)).catch(err => {
+            alert('Failed to delete message: ' + err.message);
+          });
+        };
+        div.appendChild(delBtn);
       }
+
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
     });
-  });
-</script>
+
+    onChildRemoved(messagesRef, (data) => {
+      const id = data.key;
+      const msgElements = document.querySelectorAll('.msg');
+      msgElements.forEach(msg => {
+        if (msg.dataset.key === id) {
+          msg.classList.add('fade-out');
+          setTimeout(() => msg.remove(), 500);
+        }
+      });
+    });
+  </script>
 
 </body>
 </html>
