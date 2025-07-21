@@ -8,8 +8,8 @@
   body {
     margin: 0; padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #0d0d0d;
-    color: #e0f7fa;
+    background-color: #ffffff;
+    color: #111;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -19,10 +19,10 @@
     margin-top: 40px;
     width: 90%;
     max-width: 600px;
-    background: #1c1c1c;
+    background: #f5f5f5;
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 0 10px rgba(29, 233, 182, 0.3);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     height: 70vh;
@@ -30,29 +30,29 @@
   #messages {
     flex: 1;
     overflow-y: auto;
-    background: #111;
+    background: #eee;
     padding: 1em;
     border-radius: 12px;
-    border: 1px solid #333;
+    border: 1px solid #ccc;
     margin-bottom: 10px;
   }
   .msg {
-    background: #222;
+    background: #ddd;
     padding: 0.5em 1em;
     border-radius: 10px;
     margin-bottom: 0.5em;
     position: relative;
     max-width: 90%;
-    color: #e0f7fa;
+    color: #000;
     transition: opacity 0.5s ease, height 0.5s ease, margin 0.5s ease, padding 0.5s ease;
   }
   .username {
-    color: #00ffee;
+    color: #0044ff;
     font-weight: bold;
   }
   .timestamp {
     font-size: 0.7em;
-    color: #888;
+    color: #666;
     margin-left: 10px;
   }
   .delete-btn {
@@ -61,7 +61,7 @@
     top: 5px;
     background: transparent;
     border: none;
-    color: #f55;
+    color: #d00;
     font-weight: bold;
     cursor: pointer;
     font-size: 1.1em;
@@ -72,8 +72,8 @@
     border: none;
     outline: none;
     font-size: 1em;
-    background: #222;
-    color: white;
+    background: #ddd;
+    color: #000;
     margin-bottom: 10px;
   }
   #sendBtn {
@@ -82,12 +82,12 @@
     border: none;
     cursor: pointer;
     font-size: 1em;
-    background-color: #1de9b6;
-    color: #000;
+    background-color: #0044ff;
+    color: #fff;
     font-weight: bold;
   }
   #sendBtn:hover {
-    background-color: #14b38a;
+    background-color: #0033cc;
   }
   .fade-out {
     opacity: 0 !important;
@@ -96,6 +96,16 @@
     padding: 0 !important;
     overflow: hidden !important;
     transition: opacity 0.5s ease, height 0.5s ease, margin 0.5s ease, padding 0.5s ease;
+  }
+  #changelog {
+    margin-top: 20px;
+    width: 90%;
+    max-width: 600px;
+    font-size: 0.9em;
+    background: #fafafa;
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 10px;
   }
 </style>
 </head>
@@ -106,6 +116,15 @@
   <div id="messages"></div>
   <input type="text" id="messageInput" placeholder="Type your message..." />
   <button id="sendBtn">Send</button>
+</div>
+
+<div id="changelog">
+  <strong>Changelog</strong>
+  <ul>
+    <li>Changed main theme color to white</li>
+    <li>Removed clans system</li>
+    <li>Added fade-out animation for deleted messages</li>
+  </ul>
 </div>
 
 <script type="module">
@@ -126,7 +145,6 @@
   const db = getDatabase(app);
   const messagesRef = ref(db, "messages");
 
-  // Admin list: only null_2 is admin now
   const admins = ['null_2'];
 
   let username = localStorage.getItem('nullchat_username');
@@ -155,7 +173,6 @@
     messageInput.value = '';
   }
 
-  // When new messages are added, display them
   onChildAdded(messagesRef, (data) => {
     const { user, text, timestamp } = data.val();
     const id = data.key;
@@ -193,7 +210,6 @@
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
 
-  // When messages are deleted, fade them out before removing from DOM
   onChildRemoved(messagesRef, (data) => {
     const id = data.key;
     const msgElements = document.querySelectorAll('.msg');
